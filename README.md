@@ -12,9 +12,15 @@ python server.py
 
 Open <http://127.0.0.1:8000>. The server binds to localhost and persists records in `medguard.sqlite3`. Set `PORT` to change the port or `MEDGUARD_DB` to change the SQLite path. For an HTTPS deployment behind a trusted TLS terminator, set `MEDGUARD_COOKIE_SECURE=1`. This demo is not hardened for internet-facing deployment.
 
+## Full live app deployment
+
+GitHub Pages is a static host and cannot run the Python API or persist database changes. To deploy the full app, create a Render Blueprint from this repository and approve the resources in `render.yaml`. Render will provide an HTTPS URL; the app, API, sign-in, uploads, and database-backed workflows will all use that same origin. The blueprint binds the server publicly, enables secure cookies, and stores SQLite data and private uploads on a persistent disk. The disk requires Render's paid Starter plan.
+
+Use only synthetic demo data. This prototype is not hardened for internet-facing deployment and its published demo credentials are public; do not use real patient information or rely on it for clinical decisions.
+
 ## GitHub Pages preview
 
-The GitHub Actions workflow publishes a static demo at <https://sahithi2522.github.io/MedGuard-AI/> on every push to `main`. The five role sign-ins use synthetic, read-only sample dashboards stored only in the browser session; they are not real authentication, and changes are not saved. Full backend workflows require the local Python server. GitHub Pages does not run Python or provide a database.
+The GitHub Actions workflow publishes a static, read-only preview at <https://sahithi2522.github.io/MedGuard-AI/> on every push to `main`. Its role previews use synthetic sample dashboards stored only in the browser session; they are not real authentication, and changes are not saved. Use the Render deployment above for full backend workflows. GitHub Pages does not run Python or provide a database.
 
 The supplied `assetsmedical-background.mp4` is served as a muted, looping page background with a captured poster frame and subtle scroll parallax. The background respects the browser's reduced-motion preference.
 

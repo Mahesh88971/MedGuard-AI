@@ -206,6 +206,37 @@
     const showError = (target, error) => { if (target) target.innerHTML = `<div class="result-item">${escHtml(error.message)}</div>`; };
     const fetchProfile = async () => api('/api/profile');
 
+    if (isStaticPreview) {
+      const setPreview = (id, content) => {
+        const target = byId(id);
+        if (target) target.innerHTML = content;
+      };
+      const medications = dashboardData.medications || [];
+      const preview = '<div class="result-item"><strong>Presentation preview</strong>This screen uses synthetic examples only. Changes and requests are disabled on GitHub Pages.</div>';
+
+      if (view === 'profile') {
+        setPreview('profile-records', `${preview}<div class="dashboard-grid"><div><h3>Allergies</h3>${entryList([{ name: 'No sample allergy records', source: 'Synthetic preview' }])}</div><div><h3>Conditions</h3>${entryList([{ name: 'No sample condition records', source: 'Synthetic preview' }])}</div></div>`);
+      }
+      if (view === 'prescriptions') setPreview('prescription-list', empty('No sample uploads', 'File upload and prescription confirmation require the local Python server.'));
+      if (view === 'network') setPreview('network-view', `${preview}<div class="network-list">${medications.map(item => `<div class="network-node">${escHtml(item.name)}<br><span class="disclaimer-small">${escHtml(item.ingredient)}</span></div>`).join('')}<div class="disclaimer-small">No interaction edges are shown because no clinical interaction source is configured.</div></div>`);
+      if (view === 'timeline') setPreview('history-view', empty('No stored history in this preview', 'Screening snapshots are available only in the local Python app.'));
+      if (view === 'reports' && role === 'patient') setPreview('report-list', empty('No saved reports', 'Reports are generated from local screening sessions and are not stored on GitHub Pages.'));
+      if (view === 'evidence') setPreview('evidence-view', '<div class="callout">No verified clinical reference data is configured. The preview does not assess interactions, dose limits, or treatment safety.</div>');
+      if (view === 'appointments') setPreview('appointment-list', empty('No sample appointments', 'Review and appointment requests are simulated in the local app only.'));
+      if (view === 'schedule' && role === 'patient') {
+        setPreview('schedule-list', `<div class="action-row"><span><b>Sample medicine A · Morning</b><small>10 mg · Daily · synthetic schedule label</small></span></div>`);
+        const medicationSelect = byId('schedule-medication');
+        if (medicationSelect) medicationSelect.innerHTML = `<option value="">Sample medicine A</option>${medications.slice(1).map(item => `<option value="">${escHtml(item.name)}</option>`).join('')}`;
+      }
+      if (view === 'schedule' && role === 'caregiver') setPreview('caregiver-schedules', empty('No shared schedules', 'Caregiver data requires patient consent in the local app.'));
+      if (view === 'caregiver' && role === 'patient') setPreview('patient-consents', empty('No permissions granted', 'Consent changes are disabled in this public preview.'));
+      if (view === 'dependents' && role === 'caregiver') setPreview('dependent-list', empty('No authorized dependents', 'This preview does not store consent or expose patient records.'));
+      if (view === 'notifications') setPreview('notification-list', empty('No notifications', 'Timed reminders and saved notifications are not available in the static preview.'));
+      if (view === 'analytics' && role === 'admin') setPreview('analytics-view', `<div class="metric-grid"><article class="metric glass"><div class="metric-head">Demo users</div><strong>05</strong></article><article class="metric glass"><div class="metric-head">Synthetic records</div><strong>02</strong></article></div><p class="disclaimer-small">Illustrative counts only. No account or patient data is queried.</p>`);
+      if (view === 'audit' && role === 'admin') setPreview('audit-view', empty('No audit events', 'The public preview does not perform or record account activity.'));
+      return;
+    }
+
     if (view === 'patients' && ['doctor', 'pharmacist'].includes(role)) {
       const patients = dashboardData.patients || [];
       const medicationRows = patients.flatMap(patient => patient.medications.length ? patient.medications.map(medication => `<tr><td>${escHtml(patient.name)}</td><td>${escHtml(medication.name)}</td><td>${escHtml(medication.strength || 'Not recorded')}</td><td>${escHtml(medication.dose || medication.frequency || medication.schedule || 'Instructions not recorded')}</td><td>${escHtml(medication.source || 'Patient-entered')}${medication.prescriber_name ? `<br><span class="disclaimer-small">${escHtml(medication.prescriber_name)}</span>` : ''}</td></tr>`) : `<tr><td>${escHtml(patient.name)}</td><td colspan="4">No medication records yet</td></tr>`);
